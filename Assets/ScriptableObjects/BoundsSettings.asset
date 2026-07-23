@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78b17789ce06c16439e352192fadca33, type: 3}
+  m_Script: {fileID: 11500000, guid: 073e3f60478f7c3409428c436ac56dc6, type: 3}
   m_Name: BoundsSettings
   m_EditorClassIdentifier: 
-  width: 40
-  height: 40
-  depth: 40
-  margin: 2
+  width: 100
+  height: 100
+  depth: 100
+  margin: 20

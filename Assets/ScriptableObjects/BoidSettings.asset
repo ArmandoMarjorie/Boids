@@ -9,14 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eea330c60ef2564babec4744bdd9a01, type: 3}
+  m_Script: {fileID: 11500000, guid: c4bc14de799a05c48b388b8fb071133e, type: 3}
   m_Name: BoidSettings
   m_EditorClassIdentifier: 
-  speed: 5
-  maxSpeed: 10
-  rotationSpeed: 0.7
-  fieldOfVision: 20
-  minDistance: 5
-  cohesionWeight: 3
+  speed: 15
+  maxSpeed: 25
+  rotationSpeed: 180
+  fieldOfVision: 50
+  maneuverability: 0.05
+  minDistance: 10
+  cohesionWeight: 1
   alignmentWeight: 1
-  separationWeight: 2
+  separationWeight: 1.5
