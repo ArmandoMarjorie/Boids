@@ -105,7 +105,7 @@ public class BoidController
         if (v != Vector3.zero)
         {
             v.Normalize();
-            v *= boidSettings.Maneuverability;
+            v *= boidSettings.BoundsWeight;
         }
 
         return v;
@@ -113,15 +113,22 @@ public class BoidController
 
     private void calculDirection(BoidModel boid)
     {
-        Vector3 towardDirection = Separation(boid) + 
+        Vector3 directionCorrection = Separation(boid) + 
             Cohesion(boid) + 
             Alignment(boid) + 
             StayInBoundaries(boid);
 
-        boid.Direction = (1 - boidSettings.Maneuverability) * boid.Direction +
-            boidSettings.Maneuverability * towardDirection;
+        Vector3 newDirection = boid.Direction + directionCorrection;
 
-        boid.Direction.Normalize();
+        if (newDirection.sqrMagnitude > 0f)
+        {
+            newDirection.Normalize();
+
+            boid.Direction = (1 - boidSettings.Maneuverability) * boid.Direction +
+                boidSettings.Maneuverability * newDirection;
+
+            boid.Direction.Normalize();
+        }
     }
 
     /* ------------- BOIDS RULES ------------- */

@@ -26,6 +26,9 @@ public class BoidSettings : ScriptableObject
     private int rayonAround = 50;
 
     [SerializeField]
+    private float boundsWeight = 6f;
+
+    [SerializeField]
     private float cohesionWeight = 1f;
 
     [SerializeField]
@@ -42,6 +45,7 @@ public class BoidSettings : ScriptableObject
     public int MinDistance { get => minDistance; set => minDistance = value; }
     public int RayonAround { get => rayonAround; set => rayonAround = value; }
 
+    public float BoundsWeight { get => boundsWeight; set => boundsWeight = value; }
     public float CohesionWeight { get => cohesionWeight; set => cohesionWeight = value; }
     public float AlignmentWeight { get => alignmentWeight; set => alignmentWeight = value; }
     public float SeparationWeight { get => separationWeight; set => separationWeight = value; } 

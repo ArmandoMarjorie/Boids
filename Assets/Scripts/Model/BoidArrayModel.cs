@@ -47,20 +47,20 @@ public class BoidArrayModel
 
         for (int i = 0; i < this.nbBoids; i++)
         {
-
-            x = (float)random.NextDouble() * widthCanvas;
-            y = (float)random.NextDouble() * heightCanvas;
-            z = (float)random.NextDouble() * depthCanvas;
+            x = ((float)random.NextDouble() - 0.5f) * widthCanvas;
+            y = ((float)random.NextDouble() - 0.5f) * heightCanvas;
+            z = ((float)random.NextDouble() - 0.5f) * depthCanvas;
 
             dx = (float)random.NextDouble() * 10f - 5f;
             dy = (float)random.NextDouble() * 10f - 5f;
             dz = (float)random.NextDouble() * 10f - 5f;
 
+            Vector3 direction = new Vector3(dx, dy, dz).normalized;
+
             boids[i] = new BoidModel(new Vector3(x, y, z), 
-                new Vector3(dx, dy, dz),
+                direction,
                 historyMaxSize
             );
-
         }
     }
 
