@@ -61,36 +61,20 @@ public class BoidController
         boidView.RefreshBoids(boidArrayModel, boidSettings, nbBoids, dt);
     }
 
-    /* Returns the distance between boid 1 and boid 2 */
-    private float Distance(BoidModel boid1, BoidModel boid2)
-    {
-        return Mathf.Sqrt(
-            (boid1.PositionX - boid2.PositionX) * (boid1.PositionX - boid2.PositionX) +
-            (boid1.PositionY - boid2.PositionY) * (boid1.PositionY - boid2.PositionY) +
-            (boid1.PositionZ - boid2.PositionZ) * (boid1.PositionZ - boid2.PositionZ)
-        );
-    }
-
     /* Returns true if boid 2 is within the field of vision of boid 1, false otherwise */
-    // TODO : real field of vision (angle)
-    private bool IsNeighbor(BoidModel boid1, BoidModel boid2, int fieldOfVision)
+    private bool IsNeighbor(BoidModel boid1, BoidModel boid2)
     {
-        return Distance(boid1, boid2) < fieldOfVision;
+        Vector3 towardBoid2 = boid2.Position - boid1.Position;
+
+        // Check if boid2 is around boid1
+        if (towardBoid2.sqrMagnitude > boidSettings.RayonAround * boidSettings.RayonAround)
+            return false;
+
+        // Check if boid2 is within the field of vision
+        float angle = Vector3.Angle(boid1.Direction, towardBoid2);
+
+        return angle < boidSettings.FieldOfVision / 2f;
     }
-
-    /* The speed can be excessive, so it is limited to a certain point */
-    /*
-    private void LimitSpeed(BoidModel boid)
-    {
-        float speed = Mathf.Sqrt(
-            boid.DirectionX * boid.DirectionX + 
-            boid.DirectionY * boid.DirectionY + 
-            boid.DirectionZ * boid.DirectionZ
-        );
-
-        if (speed > boidSettings.MaxSpeed)
-            boid.Direction = (boid.Direction / speed) * boidSettings.MaxSpeed;
-    }*/
 
     private Vector3 StayInBoundaries(BoidModel boid)
     {
@@ -147,7 +131,7 @@ public class BoidController
     {
         Vector3 diff = Vector3.zero;
         Vector3 v1 = Vector3.zero;
-        float distance = 0f;
+        float sqrDistance = 0f;
 
         // We want to get an average, so we will divide by the number of neighbors
         int nbNeighbors = 0;
@@ -160,12 +144,12 @@ public class BoidController
 		    {
 
                 diff = boid.Position - otherBoid.Position;
-                distance = diff.magnitude;
+                sqrDistance = diff.sqrMagnitude;
 
-                if (distance > 0f && distance < boidSettings.MinDistance)
+                if (sqrDistance > 0f && sqrDistance < boidSettings.MinDistance * boidSettings.MinDistance)
                 {
                     diff.Normalize();
-                    v1 += diff / distance;
+                    v1 += diff / sqrDistance;
                     nbNeighbors++;
                 }
                    
@@ -196,7 +180,7 @@ public class BoidController
 
             if (otherBoid != boid) 
 		    {
-			    if ( IsNeighbor(boid, otherBoid, boidSettings.FieldOfVision) ) 
+			    if ( IsNeighbor(boid, otherBoid) ) 
 			    {
 				    v2 += otherBoid.Direction;
                     nbNeighbors++;
@@ -229,7 +213,7 @@ public class BoidController
 
             if (otherBoid != boid)
             {
-                if (IsNeighbor(boid, otherBoid, boidSettings.FieldOfVision))
+                if (IsNeighbor(boid, otherBoid))
                 {
                     centerOfMass += otherBoid.Position;
                     nbNeighbors++;

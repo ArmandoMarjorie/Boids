@@ -14,13 +14,16 @@ public class BoidSettings : ScriptableObject
     private float rotationSpeed = 180f;
 
     [SerializeField]
-    private int fieldOfVision = 50;
+    private int fieldOfVision = 120;
 
     [SerializeField]
     private float maneuverability = 0.05f;
 
     [SerializeField]
     private int minDistance = 20; // La distance où un oiseau reste éloignée d'un autre oiseau
+
+    [SerializeField]
+    private int rayonAround = 50;
 
     [SerializeField]
     private float cohesionWeight = 1f;
@@ -37,6 +40,7 @@ public class BoidSettings : ScriptableObject
     public int FieldOfVision { get => fieldOfVision; set => fieldOfVision = value; }
     public float Maneuverability { get => maneuverability; set => maneuverability = value; }
     public int MinDistance { get => minDistance; set => minDistance = value; }
+    public int RayonAround { get => rayonAround; set => rayonAround = value; }
 
     public float CohesionWeight { get => cohesionWeight; set => cohesionWeight = value; }
     public float AlignmentWeight { get => alignmentWeight; set => alignmentWeight = value; }

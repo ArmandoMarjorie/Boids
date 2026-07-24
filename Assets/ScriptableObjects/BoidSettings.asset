@@ -15,9 +15,10 @@ MonoBehaviour:
   speed: 15
   maxSpeed: 25
   rotationSpeed: 180
-  fieldOfVision: 50
+  fieldOfVision: 120
   maneuverability: 0.05
-  minDistance: 10
+  minDistance: 20
+  rayonAround: 50
   cohesionWeight: 1
   alignmentWeight: 1
   separationWeight: 1.5
