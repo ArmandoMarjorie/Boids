@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073e3f60478f7c3409428c436ac56dc6, type: 3}
   m_Name: BoundsSettings
   m_EditorClassIdentifier: 
-  width: 60
-  height: 60
+  width: 90
+  height: 35
   depth: 60
-  margin: 20
+  margin: 5
+  center: {x: 18.88463, y: 41.1081, z: -35}

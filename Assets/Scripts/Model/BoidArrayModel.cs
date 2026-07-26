@@ -22,6 +22,7 @@ public class BoidArrayModel
         float widthCanvas, 
         float heightCanvas,
         float depthCanvas,
+        Vector3 center,
         int historyMaxSize)
     {
         // Default array size
@@ -55,9 +56,10 @@ public class BoidArrayModel
             dy = (float)random.NextDouble() * 10f - 5f;
             dz = (float)random.NextDouble() * 10f - 5f;
 
+            Vector3 position = new Vector3(x, y, z) + center;
             Vector3 direction = new Vector3(dx, dy, dz).normalized;
 
-            boids[i] = new BoidModel(new Vector3(x, y, z), 
+            boids[i] = new BoidModel(position, 
                 direction,
                 historyMaxSize
             );

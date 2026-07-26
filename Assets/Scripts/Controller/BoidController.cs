@@ -80,27 +80,34 @@ public class BoidController
     {
         Vector3 v = Vector3.zero;
 
-        float halfWidth = boundsSettings.Width / 2f;
-        float halfHeight = boundsSettings.Height / 2f;
-        float halfDepth = boundsSettings.Depth / 2f;
+        float minWidth = boundsSettings.Center.x - boundsSettings.Width / 2f;
+        float minHeight = boundsSettings.Center.y - boundsSettings.Height / 2f;
+        float minDepth = boundsSettings.Center.z - boundsSettings.Depth / 2f;
+
+        float maxWidth = boundsSettings.Center.x + boundsSettings.Width / 2f;
+        float maxHeight = boundsSettings.Center.y + boundsSettings.Height / 2f;
+        float maxDepth = boundsSettings.Center.z + boundsSettings.Depth / 2f;
 
         // Width boundaries
-        if (boid.PositionX > halfWidth - boundsSettings.Margin)
-            v.x = -((boid.PositionX - (halfWidth - boundsSettings.Margin)) / boundsSettings.Margin);
-        else if (boid.PositionX < -halfWidth + boundsSettings.Margin)
-            v.x = ((-halfWidth + boundsSettings.Margin) - boid.PositionX) / boundsSettings.Margin;
+        if (boid.PositionX > maxWidth - boundsSettings.Margin)
+            v.x = -( (boid.PositionX - (maxWidth - boundsSettings.Margin)) / boundsSettings.Margin );
+
+        else if (boid.PositionX < minWidth + boundsSettings.Margin)
+            v.x = ( (minWidth + boundsSettings.Margin) - boid.PositionX ) / boundsSettings.Margin;
 
         // Height boundaries
-        if (boid.PositionY > halfHeight - boundsSettings.Margin)
-            v.y = -((boid.PositionY - (halfHeight - boundsSettings.Margin)) / boundsSettings.Margin);
-        else if (boid.PositionY < -halfHeight + boundsSettings.Margin)
-            v.y = ((-halfHeight + boundsSettings.Margin) - boid.PositionY) / boundsSettings.Margin;
+        if (boid.PositionY > maxHeight - boundsSettings.Margin)
+            v.y = -( (boid.PositionY - (maxHeight - boundsSettings.Margin)) / boundsSettings.Margin );
+
+        else if (boid.PositionY < minHeight + boundsSettings.Margin)
+            v.y = ( (minHeight + boundsSettings.Margin) - boid.PositionY ) / boundsSettings.Margin;
 
         // Depth boundaries
-        if (boid.PositionZ > halfDepth - boundsSettings.Margin)
-            v.z = -((boid.PositionZ - (halfDepth - boundsSettings.Margin)) / boundsSettings.Margin);
-        else if (boid.PositionZ < -halfDepth + boundsSettings.Margin)
-            v.z = ((-halfDepth + boundsSettings.Margin) - boid.PositionZ) / boundsSettings.Margin;
+        if (boid.PositionZ > maxDepth - boundsSettings.Margin)
+            v.z = -( (boid.PositionZ - (maxDepth - boundsSettings.Margin)) / boundsSettings.Margin );
+
+        else if (boid.PositionZ < minDepth + boundsSettings.Margin)
+            v.z = ( (minDepth + boundsSettings.Margin) - boid.PositionZ ) / boundsSettings.Margin;
 
         if (v != Vector3.zero)
         {

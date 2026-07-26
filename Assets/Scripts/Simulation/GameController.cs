@@ -48,6 +48,7 @@ public class GameController : MonoBehaviour
             boundsSettings.Width,
             boundsSettings.Height,
             boundsSettings.Depth,
+            boundsSettings.Center,
             boidHistoryMaxSize);
 
         // View
