@@ -5,13 +5,13 @@ using UnityEngine;
 public class BoundsSettings : ScriptableObject
 {
     [SerializeField]
-    private int width = 60;
+    private float width = 60;
 
     [SerializeField]
-    private int height = 60;
+    private float height = 60;
 
     [SerializeField]
-    private int depth = 60;
+    private float depth = 60;
 
     [SerializeField]
     private float margin = 20f;
@@ -19,9 +19,9 @@ public class BoundsSettings : ScriptableObject
     [SerializeField]
     private Vector3 center = Vector3.zero;
 
-    public int Width { get => width; set => width = value; }
-    public int Height { get => height; set => height = value; }
-    public int Depth { get => depth; set => depth = value; }
+    public float Width { get => width; set => width = value; }
+    public float Height { get => height; set => height = value; }
+    public float Depth { get => depth; set => depth = value; }
     public float Margin { get => margin; set => margin = value; }
     public Vector3 Center { get => center; set => center = value; }
 }

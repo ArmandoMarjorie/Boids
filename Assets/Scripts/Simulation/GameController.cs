@@ -12,6 +12,9 @@ public class GameController : MonoBehaviour
 	private BoidView boidView = null;
 
     [SerializeField]
+    private CageView cageView = null;
+
+    [SerializeField]
     private BoidSettings boidSettings = null;
 
     [SerializeField]
@@ -38,6 +41,14 @@ public class GameController : MonoBehaviour
         if (boundsSettings == null)
         {
             Debug.LogError("boundsSettings is not assigned in the inspector.");
+            Application.Quit();
+        }
+
+        if(cageView != null)
+            cageView.Init(boundsSettings);
+        else
+        {
+            Debug.LogError("CageView is not assigned in the inspector.");
             Application.Quit();
         }
 
