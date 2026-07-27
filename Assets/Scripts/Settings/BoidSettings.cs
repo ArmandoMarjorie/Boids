@@ -26,6 +26,9 @@ public class BoidSettings : ScriptableObject
     private int rayonAround = 50;
 
     [SerializeField]
+    private int maxAngleVertical = 20;
+
+    [SerializeField]
     private float boundsWeight = 6f;
 
     [SerializeField]
@@ -44,6 +47,7 @@ public class BoidSettings : ScriptableObject
     public float Maneuverability { get => maneuverability; set => maneuverability = value; }
     public int MinDistance { get => minDistance; set => minDistance = value; }
     public int RayonAround { get => rayonAround; set => rayonAround = value; }
+    public int MaxAngleVertical { get => maxAngleVertical; set => maxAngleVertical = value; }
 
     public float BoundsWeight { get => boundsWeight; set => boundsWeight = value; }
     public float CohesionWeight { get => cohesionWeight; set => cohesionWeight = value; }

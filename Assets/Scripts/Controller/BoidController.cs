@@ -118,6 +118,16 @@ public class BoidController
         return v;
     }
 
+    private Vector3 LimitVerticalAngle(Vector3 direction) 
+    {
+        // sin of the max vertical angle (convert to radian)
+        float maxAngle = Mathf.Sin(boidSettings.MaxAngleVertical * Mathf.Deg2Rad);
+
+        direction.y = Mathf.Clamp(direction.y, -maxAngle, maxAngle); 
+
+        return direction.normalized; 
+    }
+
     private void calculDirection(BoidModel boid)
     {
         Vector3 directionCorrection = Separation(boid) + 
@@ -135,6 +145,8 @@ public class BoidController
                 boidSettings.Maneuverability * newDirection;
 
             boid.Direction.Normalize();
+
+            boid.Direction = LimitVerticalAngle(boid.Direction);
         }
     }
 
