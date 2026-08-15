@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4bc14de799a05c48b388b8fb071133e, type: 3}
   m_Name: BoidSettings
   m_EditorClassIdentifier: 
-  speed: 10
+  speed: 4.5
   maxSpeed: 25
   rotationSpeed: 180
   fieldOfVision: 120
   maneuverability: 0.05
   minDistance: 20
   rayonAround: 50
-  boundsWeight: 6
+  maxAngleVertical: 20
+  boundsWeight: 10
   cohesionWeight: 1.6
   alignmentWeight: 1
   separationWeight: 1.5

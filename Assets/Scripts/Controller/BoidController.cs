@@ -56,6 +56,7 @@ public class BoidController
         {
             BoidModel boidModel = boidArrayModel.getBoid(i);
             boidModel.Position += boidModel.Direction * boidSettings.Speed * dt;
+            KeepInsideBounds(boidModel);
         }
 
         boidView.RefreshBoids(boidArrayModel, boidSettings, nbBoids, dt);
@@ -76,7 +77,7 @@ public class BoidController
         return angle < boidSettings.FieldOfVision / 2f;
     }
 
-    private Vector3 StayInBoundaries(BoidModel boid)
+    private Vector3 ApplyForceToStayInBoundaries(BoidModel boid)
     {
         Vector3 v = Vector3.zero;
 
@@ -118,6 +119,21 @@ public class BoidController
         return v;
     }
 
+    private void KeepInsideBounds(BoidModel boid)
+    {
+        float minWidth = boundsSettings.Center.x - boundsSettings.Width / 2f;
+        float minHeight = boundsSettings.Center.y - boundsSettings.Height / 2f;
+        float minDepth = boundsSettings.Center.z - boundsSettings.Depth / 2f;
+
+        float maxWidth = boundsSettings.Center.x + boundsSettings.Width / 2f;
+        float maxHeight = boundsSettings.Center.y + boundsSettings.Height / 2f;
+        float maxDepth = boundsSettings.Center.z + boundsSettings.Depth / 2f;
+
+        boid.PositionX = Mathf.Clamp(boid.PositionX, minWidth, maxWidth);
+        boid.PositionY = Mathf.Clamp(boid.PositionY, minHeight, maxHeight);
+        boid.PositionZ = Mathf.Clamp(boid.PositionZ, minDepth, maxDepth);
+    }
+
     private Vector3 LimitVerticalAngle(Vector3 direction) 
     {
         // sin of the max vertical angle (convert to radian)
@@ -132,8 +148,8 @@ public class BoidController
     {
         Vector3 directionCorrection = Separation(boid) + 
             Cohesion(boid) + 
-            Alignment(boid) + 
-            StayInBoundaries(boid);
+            Alignment(boid) +
+            ApplyForceToStayInBoundaries(boid);
 
         Vector3 newDirection = boid.Direction + directionCorrection;
 
