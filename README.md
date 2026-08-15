@@ -4,7 +4,15 @@ Real-time 3D simulation of flocking behavior based on the [Boids](https://en.wik
 
 ## Demo
 
-(todo: put a video or a gif here)
+150 Boids:
+
+![150 Boids simulation outside the cage](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/gif_animation_001.gif)
+
+![150 Boids simulation inside the cage](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/gif_animation_002.gif)
+
+All the 3D assets are free in the Unity asset store:
+* [3D bird model + animations](https://assetstore.unity.com/packages/3d/characters/animals/quirky-series-free-animals-pack-178235)
+* [Sky + clouds](https://assetstore.unity.com/packages/3d/environments/simple-sky-cartoon-assets-42373)
 
 ## Features
 
@@ -24,5 +32,6 @@ Real-time 3D simulation of flocking behavior based on the [Boids](https://en.wik
 
 ## Future improvements
 
+* For the naive algorithm: list of neighbors one time
 * Neighborhood detection with an octree
 * Obstacle avoidance
