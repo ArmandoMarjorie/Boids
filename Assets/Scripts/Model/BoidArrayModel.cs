@@ -13,8 +13,7 @@ public class BoidArrayModel
     {
         if (boids != null && i >=0 && i < NbBoids)
             return boids[i];
-        else
-            return null;
+        return null;
     }
 
     /* ------------- CONSTRUCTOR ------------- */
@@ -59,10 +58,7 @@ public class BoidArrayModel
             Vector3 position = new Vector3(x, y, z) + center;
             Vector3 direction = new Vector3(dx, dy, dz).normalized;
 
-            boids[i] = new BoidModel(position, 
-                direction,
-                historyMaxSize
-            );
+            boids[i] = new BoidModel(position, direction, historyMaxSize);
         }
     }
 

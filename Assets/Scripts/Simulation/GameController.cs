@@ -44,6 +44,7 @@ public class GameController : MonoBehaviour
             Application.Quit();
         }
 
+        // View (cage)
         if(cageView != null)
             cageView.Init(boundsSettings);
         else

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class BoidController
 {
@@ -49,7 +50,10 @@ public class BoidController
         // Update the desired direction for each boid based on the rules
         for (int i = 0; i < nbBoids; i++)
         {
-            calculDirection(boidArrayModel.getBoid(i));
+            BoidModel boid = boidArrayModel.getBoid(i);
+            List<BoidModel> visibleNeighbors = GetVisibleNeighbors(boid);
+            List<BoidModel> neighborsAround = GetNeighborsAround(boid);
+            calculDirection(boid, visibleNeighbors, neighborsAround);
         }
         // Update the position for each boid based on the desired direction
         for (int i = 0; i < nbBoids; i++)
@@ -62,8 +66,10 @@ public class BoidController
         boidView.RefreshBoids(boidArrayModel, boidSettings, nbBoids, dt);
     }
 
-    /* Returns true if boid 2 is within the field of vision of boid 1, false otherwise */
-    private bool IsNeighbor(BoidModel boid1, BoidModel boid2)
+    /* Returns true if boid 2 is within the field of vision of boid 1, false otherwise.
+     * Useful for determining which boids are visible to a given boid.
+     */
+    private bool IsVisibleNeighbor(BoidModel boid1, BoidModel boid2)
     {
         Vector3 towardBoid2 = boid2.Position - boid1.Position;
 
@@ -75,6 +81,48 @@ public class BoidController
         float angle = Vector3.Angle(boid1.Direction, towardBoid2);
 
         return angle < boidSettings.FieldOfVision / 2f;
+    }
+
+    /* Returns a list of visible neighbors for the given boid.
+     * Useful for calculating cohesion and alignment forces. 
+     */
+    private List<BoidModel> GetVisibleNeighbors(BoidModel boid)
+    {
+        List<BoidModel> neighbors = new List<BoidModel>();
+
+        for (int i = 0; i < boidArrayModel.NbBoids; i++)
+        {
+            BoidModel otherBoid = boidArrayModel.getBoid(i);
+            if (otherBoid != boid && IsVisibleNeighbor(boid, otherBoid))
+                neighbors.Add(otherBoid);
+        }
+
+        return neighbors;
+    }
+
+    /* Returns true if boid 2 is around boid 1, false otherwise. */
+    private bool IsNeighborAround(BoidModel boid1, BoidModel boid2)
+    {
+        Vector3 towardBoid2 = boid2.Position - boid1.Position;
+
+        return towardBoid2.sqrMagnitude > 0f && towardBoid2.sqrMagnitude < boidSettings.MinDistance * boidSettings.MinDistance;
+    }
+
+    /* Returns a list of neighbors around the given boid.
+     * Useful for calculating separation forces.
+     */
+    private List<BoidModel> GetNeighborsAround(BoidModel boid)
+    {
+        List<BoidModel> neighbors = new List<BoidModel>();
+
+        for (int i = 0; i < boidArrayModel.NbBoids; i++)
+        {
+            BoidModel otherBoid = boidArrayModel.getBoid(i);
+            if (otherBoid != boid && IsNeighborAround(boid, otherBoid))
+                neighbors.Add(otherBoid);
+        }
+
+        return neighbors;
     }
 
     private Vector3 ApplyForceToStayInBoundaries(BoidModel boid)
@@ -144,11 +192,11 @@ public class BoidController
         return direction.normalized; 
     }
 
-    private void calculDirection(BoidModel boid)
+    private void calculDirection(BoidModel boid, List<BoidModel> visibleNeighbors, List<BoidModel> neighborsAround)
     {
-        Vector3 directionCorrection = Separation(boid) + 
-            Cohesion(boid) + 
-            Alignment(boid) +
+        Vector3 directionCorrection = Separation(boid, neighborsAround) + 
+            Cohesion(boid, visibleNeighbors) + 
+            Alignment(boid, visibleNeighbors) +
             ApplyForceToStayInBoundaries(boid);
 
         Vector3 newDirection = boid.Direction + directionCorrection;
@@ -169,33 +217,21 @@ public class BoidController
     /* ------------- BOIDS RULES ------------- */
 
     /* Separation: steer to avoid crowding local flockmates */
-    private Vector3 Separation(BoidModel boid)
+    private Vector3 Separation(BoidModel boid, List<BoidModel> neighbors)
     {
         Vector3 diff = Vector3.zero;
         Vector3 v1 = Vector3.zero;
         float sqrDistance = 0f;
 
         // We want to get an average, so we will divide by the number of neighbors
-        int nbNeighbors = 0;
+        int nbNeighbors = neighbors.Count;
 
-        for (int i = 0; i < boidArrayModel.NbBoids; i++) 
-	    {
-            BoidModel otherBoid = boidArrayModel.getBoid(i);
-
-            if (otherBoid != boid) // Boid can't be a neighbor of itself 
-		    {
-
-                diff = boid.Position - otherBoid.Position;
-                sqrDistance = diff.sqrMagnitude;
-
-                if (sqrDistance > 0f && sqrDistance < boidSettings.MinDistance * boidSettings.MinDistance)
-                {
-                    diff.Normalize();
-                    v1 += diff / sqrDistance;
-                    nbNeighbors++;
-                }
-                   
-            }
+        for (int i = 0; i < nbNeighbors; i++)
+        {
+            diff = boid.Position - neighbors[i].Position;
+            sqrDistance = diff.sqrMagnitude;
+            diff.Normalize();
+            v1 += diff / sqrDistance;
 	    }
 
         if (nbNeighbors > 0)
@@ -209,26 +245,14 @@ public class BoidController
     }
 
     /* Alignment: steer towards the average heading of local flockmates */
-    private Vector3 Alignment(BoidModel boid)
+    private Vector3 Alignment(BoidModel boid, List<BoidModel> neighbors)
     {
         Vector3 v2 = Vector3.zero;
 
-        // We want to get an average, so we will divide by the number of neighbors
-        int nbNeighbors = 0;
+        int nbNeighbors = neighbors.Count;
 
-        for (int i = 0; i < boidArrayModel.NbBoids; i++)
-        {
-            BoidModel otherBoid = boidArrayModel.getBoid(i);
-
-            if (otherBoid != boid) 
-		    {
-			    if ( IsNeighbor(boid, otherBoid) ) 
-			    {
-				    v2 += otherBoid.Direction;
-                    nbNeighbors++;
-			    }
-		    }
-	    }
+        for (int i = 0; i < nbNeighbors; i++)
+            v2 += neighbors[i].Direction;
 
 	    if (nbNeighbors > 0)
         {
@@ -242,26 +266,15 @@ public class BoidController
     }
 
     /* Cohesion: steer to move towards the average position (center of mass) of local flockmates */
-    private Vector3 Cohesion(BoidModel boid)
+    private Vector3 Cohesion(BoidModel boid, List<BoidModel> neighbors)
     {
         Vector3 centerOfMass = Vector3.zero;
         Vector3 v3 = Vector3.zero;
 
-        int nbNeighbors = 0;
+        int nbNeighbors = neighbors.Count;
 
-        for (int i = 0; i < boidArrayModel.NbBoids; i++)
-        {
-            BoidModel otherBoid = boidArrayModel.getBoid(i);
-
-            if (otherBoid != boid)
-            {
-                if (IsNeighbor(boid, otherBoid))
-                {
-                    centerOfMass += otherBoid.Position;
-                    nbNeighbors++;
-                }
-            }
-        }
+        for (int i = 0; i < nbNeighbors; i++)
+            centerOfMass += neighbors[i].Position;
 
         if (nbNeighbors > 0)
         {

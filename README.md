@@ -32,6 +32,5 @@ All the 3D assets are free in the Unity asset store:
 
 ## Future improvements
 
-* For the naive algorithm: list of neighbors one time
 * Neighborhood detection with an octree
 * Obstacle avoidance
