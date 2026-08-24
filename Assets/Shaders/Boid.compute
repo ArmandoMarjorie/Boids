@@ -1,0 +1,126 @@
+#pragma kernel Update
+#define NB_THREADS 256
+
+struct BoidModel
+{
+    float3 position;
+    float3 direction;
+};
+
+RWStructuredBuffer<BoidModel> boids;
+
+float dt;
+
+/* ------------- BOID SETTINGS ------------- */
+int nbBoids;
+float speed;
+float rotationSpeed;
+int fieldOfVision;
+float maneuverability;
+int minDistance;
+int rayonAround;
+int maxAngleVertical;
+float boundsWeight;
+float cohesionWeight;
+float alignmentWeight;
+float separationWeight;
+
+/* ------------- BOUNDS SETTINGS ------------- */
+float width;
+float height;
+float depth;
+float margin;
+float3 center;
+
+[numthreads(NB_THREADS, 1, 1)]
+void Update(uint id : SV_DispatchThreadID)
+{
+    if(id >= nbBoids)
+        return;
+    
+    // 1 thread = 1 boid
+    BoidModel boid = boids[id];
+    
+    uint nbVisibleNeighbors = 0;
+    uint nbNeighborsAround = 0;
+    
+    float3 separation = float3(0, 0, 0);
+    float3 alignment = float3(0, 0, 0);
+    float3 cohesion = float3(0, 0, 0);
+    
+    float3 diff = float3(0, 0, 0);
+    float3 centerOfMass = float3(0, 0, 0);
+    float sqrDistance = 0f;
+    
+    // Finds neighbors and calculates the new direction based on the 3 rules
+    for(uint i = 0; i < nbBoids; i++)
+    {
+        if(i != id)
+        {
+            BoidModel otherBoid = boids[i];
+            diff = boid.position - otherBoid.position;
+            
+            // TODO: implement sqrMagnitude in HLSL
+            sqrDistance = diff.sqrMagnitude;
+            
+            // separation
+            if (sqrDistance > 0f && sqrDistance < minDistance * minDistance)
+            {
+                separation += normalize(diff) / sqrDistance;
+                nbNeighborsAround++;
+            }
+            // alignment and cohesion
+            if (IsVisibleNeighbor(boid, otherBoid))
+            {
+                alignment += otherBoid.direction;
+                centerOfMass += otherBoid.position;
+                nbVisibleNeighbors++;
+            }
+        }
+    }
+    
+    // separation
+    if (nbNeighborsAround > 0)
+    {
+        separation /= (float) nbNeighborsAround;
+        separation = normalize(separation);
+        separation = (separation - boid.direction) * separationWeight;
+    }
+    // alignment and cohesion
+    if (nbVisibleNeighbors > 0)
+    {
+        alignment /= (float) nbVisibleNeighbors;
+        alignment = normalize(alignment);
+        alignment = (alignment - boid.direction) * alignmentWeight;
+        
+        // calculation of the average position of the neighbors (center of mass)
+        centerOfMass /= (float) nbVisibleNeighbors; 
+        // direction toward the center
+        cohesion = (centerOfMass - boid.position);
+        cohesion = normalize(cohesion);
+        cohesion = (cohesion - boid.direction) * cohesionWeight;
+    }
+    
+    /* todo: calc direction here (CalculateDirection in c#)*/
+    /* ...
+    */
+    
+    boid.position += boid.direction * speed * dt;
+    boids[id] = boid;
+}
+
+bool IsVisibleNeighbor(BoidModel boid1, BoidModel boid2)
+{
+    float3 towardBoid2 = boid2.position - boid1.position;
+
+    // Check if boid2 is around boid1
+    // TODO: implement sqrMagnitude in HLSL
+    if (towardBoid2.sqrMagnitude > rayonAround * rayonAround)
+        return false;
+
+    // Check if boid2 is within the field of vision
+    // TODO: implement angle calculation in HLSL
+    float angle = Vector3.Angle(boid1.direction, towardBoid2);
+
+    return angle < fieldOfVision / 2f;
+}
