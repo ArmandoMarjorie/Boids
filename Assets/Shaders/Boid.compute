@@ -32,6 +32,9 @@ float depth;
 float margin;
 float3 center;
 
+bool IsVisibleNeighbor(BoidModel boid1, float3 towardBoid2, float sqrDistance);
+float3 CalculateDirection(float3 boidDirection, float3 separation, float3 cohesion, float3 alignment);
+
 [numthreads(NB_THREADS, 1, 1)]
 void Update(uint id : SV_DispatchThreadID)
 {
@@ -59,18 +62,18 @@ void Update(uint id : SV_DispatchThreadID)
         {
             BoidModel otherBoid = boids[i];
             diff = boid.position - otherBoid.position;
-            
-            // TODO: implement sqrMagnitude in HLSL
-            sqrDistance = diff.sqrMagnitude;
+ 
+            sqrDistance = dot(diff, diff);
+            diff = normalize(diff);
             
             // separation
-            if (sqrDistance > 0f && sqrDistance < minDistance * minDistance)
+            if(sqrDistance > 0f && sqrDistance < minDistance * minDistance)
             {
-                separation += normalize(diff) / sqrDistance;
+                separation += diff / sqrDistance;
                 nbNeighborsAround++;
             }
             // alignment and cohesion
-            if (IsVisibleNeighbor(boid, otherBoid))
+            if(IsVisibleNeighbor(boid, diff, sqrDistance))
             {
                 alignment += otherBoid.direction;
                 centerOfMass += otherBoid.position;
@@ -80,14 +83,14 @@ void Update(uint id : SV_DispatchThreadID)
     }
     
     // separation
-    if (nbNeighborsAround > 0)
+    if(nbNeighborsAround > 0)
     {
         separation /= (float) nbNeighborsAround;
         separation = normalize(separation);
         separation = (separation - boid.direction) * separationWeight;
     }
     // alignment and cohesion
-    if (nbVisibleNeighbors > 0)
+    if(nbVisibleNeighbors > 0)
     {
         alignment /= (float) nbVisibleNeighbors;
         alignment = normalize(alignment);
@@ -101,26 +104,53 @@ void Update(uint id : SV_DispatchThreadID)
         cohesion = (cohesion - boid.direction) * cohesionWeight;
     }
     
-    /* todo: calc direction here (CalculateDirection in c#)*/
-    /* ...
-    */
+    boid.direction = CalculateDirection(boid.direction, separation, cohesion, alignment);
     
+    /* il faut faire ça après avoir calculé la nouvelle direction pour TOUS les boids, 
+    sinon on va se retrouver avec des boids qui vont se déplacer en fonction de la 
+    direction des autres boids qui ont déjà été mis à jour */
     boid.position += boid.direction * speed * dt;
     boids[id] = boid;
 }
 
-bool IsVisibleNeighbor(BoidModel boid1, BoidModel boid2)
+float3 CalculateDirection(float3 boidDirection, float3 separation, float3 cohesion, float3 alignment)
 {
-    float3 towardBoid2 = boid2.position - boid1.position;
+    float3 directionCorrection = separation +
+    cohesion +
+    alignment;
+    //+ ApplyForceToStayInBoundaries(boid);
 
+    float3 newDirection = boidDirection + directionCorrection;
+
+    if(dot(newDirection, newDirection) > 0f)
+    {
+        newDirection = normalize(newDirection);
+
+        boidDirection = (1 - maneuverability) * boidDirection + maneuverability * newDirection;
+
+        boidDirection = normalize(boidDirection);
+
+        //boidDirection = LimitVerticalAngle(boidDirection);
+    }
+    
+    return boidDirection;
+}
+
+// je dois m'assurer que boid1.direction et towardBoid2 soient normalisés avant d'appeler cette fonction
+// towardBoid2 => ok normarlisé
+bool IsVisibleNeighbor(BoidModel boid1, float3 towardBoid2, float sqrDistance)
+{
     // Check if boid2 is around boid1
-    // TODO: implement sqrMagnitude in HLSL
-    if (towardBoid2.sqrMagnitude > rayonAround * rayonAround)
+    if (sqrDistance > rayonAround * rayonAround)
         return false;
 
     // Check if boid2 is within the field of vision
-    // TODO: implement angle calculation in HLSL
-    float angle = Vector3.Angle(boid1.direction, towardBoid2);
-
-    return angle < fieldOfVision / 2f;
+    // /!\ both vectors must be normalized 
+    float cosAngle = dot(boid1.direction, towardBoid2);
+    
+    // cos(angle) instead of angle to avoid calling arccos which is expensive
+    // /!\  we compare cos, not angles themselves. 
+    // angle < fieldOfVision / 2  <=> cos(angle) > cos(fieldOfVision / 2)
+    // /!\ fieldOfVision is in degrees, so we convert it to radians
+    return cosAngle > cos( radians(fieldOfVision / 2f) );
 }
