@@ -32,8 +32,14 @@ float depth;
 float margin;
 float3 center;
 
-bool IsVisibleNeighbor(BoidModel boid1, float3 towardBoid2, float sqrDistance);
-float3 CalculateDirection(float3 boidDirection, float3 separation, float3 cohesion, float3 alignment);
+bool IsVisibleNeighbor(float3 boidDirection, float3 towardBoid2, float sqrDistance);
+float3 LimitVerticalAngle(float3 boidDirection);
+float3 ApplyForceToStayInBoundaries(float3 boidPosition);
+float3 CalculateDirection(float3 boidDirection, 
+    float3 boidPosition, 
+    float3 separation, 
+    float3 cohesion, 
+    float3 alignment);
 
 [numthreads(NB_THREADS, 1, 1)]
 void Update(uint id : SV_DispatchThreadID)
@@ -73,7 +79,7 @@ void Update(uint id : SV_DispatchThreadID)
                 nbNeighborsAround++;
             }
             // alignment and cohesion
-            if(IsVisibleNeighbor(boid, diff, sqrDistance))
+            if(IsVisibleNeighbor(boid.direction, diff, sqrDistance))
             {
                 alignment += otherBoid.direction;
                 centerOfMass += otherBoid.position;
@@ -104,7 +110,7 @@ void Update(uint id : SV_DispatchThreadID)
         cohesion = (cohesion - boid.direction) * cohesionWeight;
     }
     
-    boid.direction = CalculateDirection(boid.direction, separation, cohesion, alignment);
+    boid.direction = CalculateDirection(boid.direction, boid.position, separation, cohesion, alignment);
     
     /* il faut faire ça après avoir calculé la nouvelle direction pour TOUS les boids, 
     sinon on va se retrouver avec des boids qui vont se déplacer en fonction de la 
@@ -113,32 +119,87 @@ void Update(uint id : SV_DispatchThreadID)
     boids[id] = boid;
 }
 
-float3 CalculateDirection(float3 boidDirection, float3 separation, float3 cohesion, float3 alignment)
+float3 CalculateDirection(float3 boidDirection, 
+    float3 boidPosition, 
+    float3 separation, 
+    float3 cohesion, 
+    float3 alignment)
 {
     float3 directionCorrection = separation +
-    cohesion +
-    alignment;
-    //+ ApplyForceToStayInBoundaries(boid);
+        cohesion +
+        alignment + 
+        ApplyForceToStayInBoundaries(boidPosition);
 
     float3 newDirection = boidDirection + directionCorrection;
 
     if(dot(newDirection, newDirection) > 0f)
     {
         newDirection = normalize(newDirection);
-
+        // interpolation between the current direction and the new direction based on maneuverability
         boidDirection = (1 - maneuverability) * boidDirection + maneuverability * newDirection;
 
         boidDirection = normalize(boidDirection);
-
-        //boidDirection = LimitVerticalAngle(boidDirection);
+        boidDirection = LimitVerticalAngle(boidDirection);
     }
     
     return boidDirection;
 }
 
-// je dois m'assurer que boid1.direction et towardBoid2 soient normalisés avant d'appeler cette fonction
+float3 ApplyForceToStayInBoundaries(float3 boidPosition)
+{
+    float3 v = float3(0, 0, 0);
+
+    float minWidth = center.x - width / 2f;
+    float minHeight = center.y - height / 2f;
+    float minDepth = center.z - depth / 2f;
+
+    float maxWidth = center.x + width / 2f;
+    float maxHeight = center.y + height / 2f;
+    float maxDepth = center.z + depth / 2f;
+
+    // Width boundaries
+    if (boidPosition.x > maxWidth - margin)
+        v.x = -( (boidPosition.x - (maxWidth - margin)) / margin );
+
+    else if (boidPosition.x < minWidth + margin)
+        v.x = ( (minWidth + margin) - boidPosition.x ) / margin;
+
+    // Height boundaries
+    if (boidPosition.y > maxHeight - margin)
+        v.y = -( (boidPosition.y - (maxHeight - margin)) / margin );
+
+    else if (boidPosition.y < minHeight + margin)
+        v.y = ( (minHeight + margin) - boidPosition.y ) / margin;
+
+    // Depth boundaries
+    if (boidPosition.z > maxDepth - margin)
+        v.z = -( (boidPosition.z - (maxDepth - margin)) / margin );
+
+    else if (boidPosition.z < minDepth + margin)
+        v.z = ( (minDepth + margin) - boidPosition.z ) / margin;
+
+    if (v != float3(0, 0, 0))
+    {
+        v = normalize(v);
+        v *= boundsWeight;
+    }
+
+    return v;
+}
+
+float3 LimitVerticalAngle(float3 boidDirection) 
+{
+    // sin of the max vertical angle (convert to radian)
+    float maxAngle = sin( radians(maxAngleVertical) );
+
+    boidDirection.y = clamp(boidDirection.y, -maxAngle, maxAngle);
+
+    return normalize(boidDirection);
+}
+
+// je dois m'assurer que boidDirection et towardBoid2 soient normalisés avant d'appeler cette fonction
 // towardBoid2 => ok normarlisé
-bool IsVisibleNeighbor(BoidModel boid1, float3 towardBoid2, float sqrDistance)
+bool IsVisibleNeighbor(float3 boidDirection, float3 towardBoid2, float sqrDistance)
 {
     // Check if boid2 is around boid1
     if (sqrDistance > rayonAround * rayonAround)
@@ -146,7 +207,7 @@ bool IsVisibleNeighbor(BoidModel boid1, float3 towardBoid2, float sqrDistance)
 
     // Check if boid2 is within the field of vision
     // /!\ both vectors must be normalized 
-    float cosAngle = dot(boid1.direction, towardBoid2);
+    float cosAngle = dot(boidDirection, towardBoid2);
     
     // cos(angle) instead of angle to avoid calling arccos which is expensive
     // /!\  we compare cos, not angles themselves. 
