@@ -11,7 +11,10 @@ public class GPUBoid
     /* ------------- GPU SETTINGS ------------- */
     private ComputeShader computeShader = null;
     private ComputeBuffer buffer = null;
-    private int indexKernel;
+    private int idKernelDirections;
+    private int idKernelPositions;
+    private int nbThreadsPerGroups;
+    private int nbGroupsThreads;
 
     /* ------------- BOID SETTINGS ------------- */
     private BoidView boidView = null;
@@ -34,8 +37,11 @@ public class GPUBoid
             Application.Quit();
         }
         nbBoids = nb;
-        indexKernel = computeShader.FindKernel("Update");
+        idKernelDirections = computeShader.FindKernel("UpdateDirections");
+        idKernelPositions = computeShader.FindKernel("UpdatePositions");
         buffer = new ComputeBuffer(nbBoids, sizeof(float) * 6); // à revoir pour size
+        nbThreadsPerGroups = 256; 
+        nbGroupsThreads = Mathf.CeilToInt(nbBoids / (float)nbThreadsPerGroups);
 
         /* ------------- BOID SETTINGS INITIALIZATION ------------- */
         if (view != null)
@@ -61,7 +67,7 @@ public class GPUBoid
         }
     }
 
-    public void InitGPUData(float dt) // dt = Time.deltaTime
+    public void InitGPUData()
     {
         if (computeShader == null)
         {
@@ -78,8 +84,9 @@ public class GPUBoid
             Debug.LogError("boundsSettings is not assigned in the inspector.");
             Application.Quit();
         }
-        computeShader.SetBuffer(indexKernel, "boids", buffer);
-        computeShader.SetFloat("dt", dt);
+        computeShader.SetBuffer(idKernelDirections, "boids", buffer);
+        computeShader.SetBuffer(idKernelPositions, "boids", buffer);
+        computeShader.SetInt("nbThreadsPerGroups", nbThreadsPerGroups);
 
         computeShader.SetInt("nbBoids", nbBoids);
         computeShader.SetFloat("speed", boidSettings.Speed);
@@ -101,31 +108,11 @@ public class GPUBoid
         computeShader.SetVector("center", boundsSettings.Center);
     }
 
-    /* ----------------------------------------------------------------------------- */
-
-
-    public void Update()
+    public void Update(float dt)
     {
-        /*
-        int nbBoids = boidArrayModel.NbBoids;
+        computeShader.SetFloat("dt", dt);
 
-        // Update the desired direction for each boid based on the rules
-        for (int i = 0; i < nbBoids; i++)
-        {
-            BoidModel boid = boidArrayModel.getBoid(i);
-            List<BoidModel> visibleNeighbors = GetVisibleNeighbors(boid);
-            List<BoidModel> neighborsAround = GetNeighborsAround(boid);
-            calculDirection(boid, visibleNeighbors, neighborsAround);
-        }
-        // Update the position for each boid based on the desired direction
-        for (int i = 0; i < nbBoids; i++)
-        {
-            BoidModel boidModel = boidArrayModel.getBoid(i);
-            boidModel.Position += boidModel.Direction * boidSettings.Speed * dt;
-            KeepInsideBounds(boidModel);
-        }
-
-        boidView.RefreshBoids(boidArrayModel, boidSettings, nbBoids, dt);
-        */
+        computeShader.Dispatch(idKernelDirections, nbGroupsThreads, 1, 1);
+        computeShader.Dispatch(idKernelPositions, nbGroupsThreads, 1, 1);
     }
 }

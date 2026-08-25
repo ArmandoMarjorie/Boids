@@ -1,4 +1,5 @@
-#pragma kernel Update
+#pragma kernel UpdateDirections
+#pragma kernel UpdatePositions
 #define NB_THREADS 256
 
 struct BoidModel
@@ -8,6 +9,7 @@ struct BoidModel
 };
 
 RWStructuredBuffer<BoidModel> boids;
+int nbThreadsPerGroups;
 
 float dt;
 
@@ -41,8 +43,8 @@ float3 CalculateDirection(float3 boidDirection,
     float3 cohesion, 
     float3 alignment);
 
-[numthreads(NB_THREADS, 1, 1)]
-void Update(uint id : SV_DispatchThreadID)
+[numthreads(nbThreadsPerGroups, 1, 1)]
+void UpdateDirections(uint id : SV_DispatchThreadID)
 {
     if(id >= nbBoids)
         return;
@@ -112,10 +114,22 @@ void Update(uint id : SV_DispatchThreadID)
     
     boid.direction = CalculateDirection(boid.direction, boid.position, separation, cohesion, alignment);
     
-    /* il faut faire ça après avoir calculé la nouvelle direction pour TOUS les boids, 
-    sinon on va se retrouver avec des boids qui vont se déplacer en fonction de la 
-    direction des autres boids qui ont déjà été mis à jour */
+    boids[id] = boid;
+}
+
+/* il faut faire ça après avoir calculé la nouvelle direction pour TOUS les boids, 
+sinon on va se retrouver avec des boids qui vont se déplacer en fonction de la 
+direction des autres boids qui ont déjà été mis à jour */
+[numthreads(nbThreadsPerGroups, 1, 1)]
+void UpdatePositions(uint id : SV_DispatchThreadID)
+{
+    if (id >= nbBoids)
+        return;
+    
+    // 1 thread = 1 boid
+    BoidModel boid = boids[id];
     boid.position += boid.direction * speed * dt;
+    
     boids[id] = boid;
 }
 
