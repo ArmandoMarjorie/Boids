@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-	private GPUBoid boidGPU = null;
+    private BoidArrayModel boidArrayModel = null;
+    private GPUBoidController GPU_boidController = null;
 
 	/* ------------- SCENE SETTINGS ------------- */
 	[Header("Scene References")]
@@ -54,6 +55,13 @@ public class GameController : MonoBehaviour
 
         /* ------------- BOIDS INITIALIZATION ------------- */
 
+        // Model
+        boidArrayModel = new BoidArrayModel(nbBoids,
+            boundsSettings.Width,
+            boundsSettings.Height,
+            boundsSettings.Depth,
+            boundsSettings.Center);
+
         // View
         if (boidView != null)
 			boidView.Init(boidArrayModel, nbBoids);
@@ -71,11 +79,11 @@ public class GameController : MonoBehaviour
         }
 
         // Controller
-        boidGPU = new GPUBoid(cs, nb, boidView, boidSettings, boundsSettings);
+        GPU_boidController = new GPUBoidController(cs, boidView, boidSettings, boundsSettings);
 	}
 
     public void Update()
 	{
-		boidGPU.Update(Time.deltaTime);
+        GPU_boidController.Update(Time.deltaTime);
 	}
 }

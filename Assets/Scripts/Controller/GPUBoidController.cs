@@ -6,44 +6,36 @@ using System.Collections.Generic;
  * It handles the initialization of the compute shader, updating boid positions and directions,
  * and applying the boid rules (separation, alignment, cohesion) using GPU parallel processing.
  */
-public class GPUBoid
+public class GPUBoidController
 {
-    /* ------------- GPU SETTINGS ------------- */
-    private ComputeShader computeShader = null;
-    private ComputeBuffer buffer = null;
-    private int idKernelDirections;
-    private int idKernelPositions;
-    private int nbThreadsPerGroups;
-    private int nbGroupsThreads;
-
     /* ------------- BOID SETTINGS ------------- */
+    private BoidArrayModel boidArrayModel = null;
     private BoidView boidView = null;
     private BoidSettings boidSettings = null;
     private BoundsSettings boundsSettings = null;
-    private int nbBoids;
 
-    public GPUBoid(ComputeShader cs,
-        int nb,
+    /* ------------- GPU SETTINGS ------------- */
+    private ComputeShader computeShader = null;
+    private ComputeBuffer buffer = null;
+    private int idKernelDirections = 0;
+    private int idKernelPositions = 0;
+    private int nbThreadsPerGroups = 0;
+    private int nbGroupsThreads = 0;
+
+    public GPUBoidController(BoidArrayModel model,
+        ComputeShader cs,
         BoidView view,
         BoidSettings bSettings,
         BoundsSettings boSettings)
     {
-        /* ------------- GPU INITIALIZATION ------------- */
-        if (cs != null)
-            computeShader = cs;
+        /* ------------- BOID SETTINGS INITIALIZATION ------------- */
+        if (model != null)
+            boidArrayModel = model;
         else
         {
-            Debug.LogError("ComputeShader is not assigned in the inspector.");
+            Debug.LogError("boidArrayModel is not assigned in the inspector.");
             Application.Quit();
         }
-        nbBoids = nb;
-        idKernelDirections = computeShader.FindKernel("UpdateDirections");
-        idKernelPositions = computeShader.FindKernel("UpdatePositions");
-        buffer = new ComputeBuffer(nbBoids, sizeof(float) * 6); // à revoir pour size
-        nbThreadsPerGroups = 256; 
-        nbGroupsThreads = Mathf.CeilToInt(nbBoids / (float)nbThreadsPerGroups);
-
-        /* ------------- BOID SETTINGS INITIALIZATION ------------- */
         if (view != null)
             boidView = view;
         else
@@ -65,6 +57,20 @@ public class GPUBoid
             Debug.LogError("boundsSettings is not assigned in the inspector.");
             Application.Quit();
         }
+
+        /* ------------- GPU INITIALIZATION ------------- */
+        if (cs != null)
+            computeShader = cs;
+        else
+        {
+            Debug.LogError("ComputeShader is not assigned in the inspector.");
+            Application.Quit();
+        }
+        idKernelDirections = computeShader.FindKernel("UpdateDirections");
+        idKernelPositions = computeShader.FindKernel("UpdatePositions");
+        buffer = new ComputeBuffer(boidArrayModel.NbBoids, sizeof(float) * 6); // à revoir pour size
+        nbThreadsPerGroups = 256; 
+        nbGroupsThreads = Mathf.CeilToInt(boidArrayModel.NbBoids / (float)nbThreadsPerGroups);
     }
 
     public void InitGPUData()
@@ -86,9 +92,10 @@ public class GPUBoid
         }
         computeShader.SetBuffer(idKernelDirections, "boids", buffer);
         computeShader.SetBuffer(idKernelPositions, "boids", buffer);
+        buffer.SetData(boidArrayModel.getArray());
         computeShader.SetInt("nbThreadsPerGroups", nbThreadsPerGroups);
 
-        computeShader.SetInt("nbBoids", nbBoids);
+        computeShader.SetInt("nbBoids", boidArrayModel.NbBoids);
         computeShader.SetFloat("speed", boidSettings.Speed);
         computeShader.SetFloat("rotationSpeed", boidSettings.RotationSpeed);
         computeShader.SetInt("fieldOfVision", boidSettings.FieldOfVision);

@@ -1,24 +1,24 @@
 using UnityEngine;
 
-public class BoidView : MonoBehaviour
+public class GPUBoidView : MonoBehaviour
 {
-    [SerializeField] 
-    private GameObject boidPrefab;
+    [SerializeField]
+    private Mesh boidMesh;
 
-    private Transform[] boids;
+    [SerializeField]
+    private Material boidMaterial;
 
-    public void Init(BoidArrayModel arrayModel, int nbBoids)
+    public void Init(BoidArrayModel boids, int nbBoids)
     {
-        boids = new Transform[nbBoids];
+        boidMesh = boidPrefab.GetComponent<MeshFilter>().sharedMesh;
 
-        for (int i = 0; i < nbBoids; i++)
-        {
-            BoidModel boidModel = arrayModel.getBoid(i);
-            GameObject go = Instantiate(boidPrefab, transform);
-            go.name = $"Boid {i}";
-            boids[i] = go.transform;
-            boids[i].position = boidModel.Position;
-        }
+        buffer = new ComputeBuffer(nbBoids, boidStride);
+
+        // Initialisation des données GPU
+        boidBuffer.SetData(boids);
+
+        // Association au shader de rendu
+        material.SetBuffer("boids", buffer);
     }
 
     public void RefreshBoids(BoidArrayModel arrayModel, BoidSettings settings, int nbBoids, float dt)
