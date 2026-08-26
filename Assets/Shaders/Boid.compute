@@ -1,6 +1,5 @@
 #pragma kernel UpdateDirections
 #pragma kernel UpdatePositions
-#define NB_THREADS 256
 
 struct BoidModel
 {
