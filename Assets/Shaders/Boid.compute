@@ -60,7 +60,7 @@ void UpdateDirections(uint id : SV_DispatchThreadID)
     
     float3 diff = float3(0, 0, 0);
     float3 centerOfMass = float3(0, 0, 0);
-    float sqrDistance = 0f;
+    float sqrDistance = 0.0;
     
     // Finds neighbors and calculates the new direction based on the 3 rules
     for(uint i = 0; i < nbBoids; i++)
@@ -74,7 +74,7 @@ void UpdateDirections(uint id : SV_DispatchThreadID)
             diff = normalize(diff);
             
             // separation
-            if(sqrDistance > 0f && sqrDistance < minDistance * minDistance)
+            if(sqrDistance > 0.0 && sqrDistance < minDistance * minDistance)
             {
                 separation += diff / sqrDistance;
                 nbNeighborsAround++;
@@ -145,7 +145,7 @@ float3 CalculateDirection(float3 boidDirection,
 
     float3 newDirection = boidDirection + directionCorrection;
 
-    if(dot(newDirection, newDirection) > 0f)
+    if(dot(newDirection, newDirection) > 0.0)
     {
         newDirection = normalize(newDirection);
         // interpolation between the current direction and the new direction based on maneuverability
@@ -162,13 +162,13 @@ float3 ApplyForceToStayInBoundaries(float3 boidPosition)
 {
     float3 v = float3(0, 0, 0);
 
-    float minWidth = center.x - width / 2f;
-    float minHeight = center.y - height / 2f;
-    float minDepth = center.z - depth / 2f;
+    float minWidth = center.x - width / 2.0;
+    float minHeight = center.y - height / 2.0;
+    float minDepth = center.z - depth / 2.0;
 
-    float maxWidth = center.x + width / 2f;
-    float maxHeight = center.y + height / 2f;
-    float maxDepth = center.z + depth / 2f;
+    float maxWidth = center.x + width / 2.0;
+    float maxHeight = center.y + height / 2.0;
+    float maxDepth = center.z + depth / 2.0;
 
     // Width boundaries
     if (boidPosition.x > maxWidth - margin)
@@ -226,5 +226,5 @@ bool IsVisibleNeighbor(float3 boidDirection, float3 towardBoid2, float sqrDistan
     // /!\  we compare cos, not angles themselves. 
     // angle < fieldOfVision / 2  <=> cos(angle) > cos(fieldOfVision / 2)
     // /!\ fieldOfVision is in degrees, so we convert it to radians
-    return cosAngle > cos( radians(fieldOfVision / 2f) );
+    return cosAngle > cos( radians(fieldOfVision / 2.0) );
 }

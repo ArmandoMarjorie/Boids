@@ -10,7 +10,7 @@ public class GPUBoidController
 {
     /* ------------- BOID SETTINGS ------------- */
     private BoidArrayModel boidArrayModel = null;
-    private BoidView boidView = null;
+    private GPUBoidView boidView = null;
     private BoidSettings boidSettings = null;
     private BoundsSettings boundsSettings = null;
 
@@ -21,10 +21,11 @@ public class GPUBoidController
     private int idKernelPositions = 0;
     private int nbThreadsPerGroups = 0;
     private int nbGroupsThreads = 0;
+    private Material boidMaterial = null;
 
     public GPUBoidController(BoidArrayModel model,
         ComputeShader cs,
-        BoidView view,
+        GPUBoidView view,
         BoidSettings bSettings,
         BoundsSettings boSettings)
     {
@@ -64,6 +65,13 @@ public class GPUBoidController
         else
         {
             Debug.LogError("ComputeShader is not assigned in the inspector.");
+            Application.Quit();
+        }
+        if (material != null)
+            boidMaterial = material;
+        else
+        {
+            Debug.LogError("BoidMaterial is not assigned in the inspector.");
             Application.Quit();
         }
         idKernelDirections = computeShader.FindKernel("UpdateDirections");
@@ -113,13 +121,28 @@ public class GPUBoidController
         computeShader.SetFloat("depth", boundsSettings.Depth);
         computeShader.SetFloat("margin", boundsSettings.Margin);
         computeShader.SetVector("center", boundsSettings.Center);
+        
+        boidView.Init(buffer, boidArrayModel.NbBoids);
     }
 
     public void Update(float dt)
     {
+        // Compute
         computeShader.SetFloat("dt", dt);
-
         computeShader.Dispatch(idKernelDirections, nbGroupsThreads, 1, 1);
         computeShader.Dispatch(idKernelPositions, nbGroupsThreads, 1, 1);
+
+        // Render
+        boidView.RefreshBoids();
+    }
+
+    // todo: check if i can do that
+    private void OnDestroy()
+    {
+        if (buffer != null)
+        {
+            buffer.Release();
+            buffer = null;
+        }
     }
 }

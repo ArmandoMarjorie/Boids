@@ -20,7 +20,7 @@ Shader "Boids/BoidRender"
 			// A way to pass data from the vertex shader to the fragment shader
 			struct v2f
 			{
-				float4 vertex : SV_POSITION
+				float4 vertex : SV_POSITION;
 			};
 
 			struct BoidModel

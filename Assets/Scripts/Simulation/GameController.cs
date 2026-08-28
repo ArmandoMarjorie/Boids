@@ -8,8 +8,8 @@ public class GameController : MonoBehaviour
 	/* ------------- SCENE SETTINGS ------------- */
 	[Header("Scene References")]
 
-	[SerializeField]
-	private BoidView boidView = null;
+    [SerializeField]
+	private GPUBoidView boidView = null;
 
     [SerializeField]
     private CageView cageView = null;
@@ -20,20 +20,13 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private BoundsSettings boundsSettings = null;
 
-	/* ------------- BOIDS SETTINGS ------------- */
-	[Header("Boids Settings")]
+    [SerializeField]
+    private int nbBoids = 100;
 
-	[SerializeField]
-	private int boidHistoryMaxSize = 50;
+    [SerializeField]
+    private ComputeShader computeShader = null;
 
-	[SerializeField]
-	private int nbBoids = 100;
-
-	[SerializeField]
-	private bool dessin_parcours = true;
-
-
-	public void Start()
+    public void Start()
 	{
         /* ------------- SCENE INITIALIZATION ------------- */
 
@@ -78,9 +71,17 @@ public class GameController : MonoBehaviour
             Application.Quit();
         }
 
+        // Compute Shader
+        if (computeShader == null)
+        {
+            Debug.LogError("computeShader is not assigned in the inspector.");
+            Application.Quit();
+        }
+
         // Controller
-        GPU_boidController = new GPUBoidController(cs, boidView, boidSettings, boundsSettings);
-	}
+        GPU_boidController = new GPUBoidController(boidArrayModel, computeShader, boidView, boidSettings, boundsSettings);
+        GPU_boidController.InitGPUData();
+    }
 
     public void Update()
 	{
