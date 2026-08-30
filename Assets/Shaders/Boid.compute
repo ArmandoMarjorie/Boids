@@ -1,6 +1,8 @@
 #pragma kernel UpdateDirections
 #pragma kernel UpdatePositions
 
+#define NB_THREADS_PER_GROUP 256
+
 struct BoidModel
 {
     float3 position;
@@ -8,8 +10,6 @@ struct BoidModel
 };
 
 RWStructuredBuffer<BoidModel> boids;
-int nbThreadsPerGroups;
-
 float dt;
 
 /* ------------- BOID SETTINGS ------------- */
@@ -42,10 +42,10 @@ float3 CalculateDirection(float3 boidDirection,
     float3 cohesion, 
     float3 alignment);
 
-[numthreads(nbThreadsPerGroups, 1, 1)]
+[numthreads(NB_THREADS_PER_GROUP, 1, 1)]
 void UpdateDirections(uint id : SV_DispatchThreadID)
 {
-    if(id >= nbBoids)
+    if (id >= (uint) nbBoids)
         return;
     
     // 1 thread = 1 boid
@@ -63,7 +63,7 @@ void UpdateDirections(uint id : SV_DispatchThreadID)
     float sqrDistance = 0.0;
     
     // Finds neighbors and calculates the new direction based on the 3 rules
-    for(uint i = 0; i < nbBoids; i++)
+    for(uint i = 0; i < (uint)nbBoids; i++)
     {
         if(i != id)
         {
@@ -119,10 +119,10 @@ void UpdateDirections(uint id : SV_DispatchThreadID)
 /* il faut faire ça après avoir calculé la nouvelle direction pour TOUS les boids, 
 sinon on va se retrouver avec des boids qui vont se déplacer en fonction de la 
 direction des autres boids qui ont déjà été mis à jour */
-[numthreads(nbThreadsPerGroups, 1, 1)]
+[numthreads(NB_THREADS_PER_GROUP, 1, 1)]
 void UpdatePositions(uint id : SV_DispatchThreadID)
 {
-    if (id >= nbBoids)
+    if (id >= (uint)nbBoids)
         return;
     
     // 1 thread = 1 boid
@@ -191,7 +191,7 @@ float3 ApplyForceToStayInBoundaries(float3 boidPosition)
     else if (boidPosition.z < minDepth + margin)
         v.z = ( (minDepth + margin) - boidPosition.z ) / margin;
 
-    if (v != float3(0, 0, 0))
+    if (dot(v, v) > 0.0)
     {
         v = normalize(v);
         v *= boundsWeight;

@@ -19,9 +19,8 @@ public class GPUBoidController
     private ComputeBuffer buffer = null;
     private int idKernelDirections = 0;
     private int idKernelPositions = 0;
-    private int nbThreadsPerGroups = 0;
+    private int nbThreadsPerGroups = 256; // /!\ have to match with NB_THREADS_PER_GROUP in Shaders/Boid.compute
     private int nbGroupsThreads = 0;
-    private Material boidMaterial = null;
 
     public GPUBoidController(BoidArrayModel model,
         ComputeShader cs,
@@ -67,17 +66,9 @@ public class GPUBoidController
             Debug.LogError("ComputeShader is not assigned in the inspector.");
             Application.Quit();
         }
-        if (material != null)
-            boidMaterial = material;
-        else
-        {
-            Debug.LogError("BoidMaterial is not assigned in the inspector.");
-            Application.Quit();
-        }
         idKernelDirections = computeShader.FindKernel("UpdateDirections");
         idKernelPositions = computeShader.FindKernel("UpdatePositions");
         buffer = new ComputeBuffer(boidArrayModel.NbBoids, sizeof(float) * 6); // à revoir pour size
-        nbThreadsPerGroups = 256; 
         nbGroupsThreads = Mathf.CeilToInt(boidArrayModel.NbBoids / (float)nbThreadsPerGroups);
     }
 
@@ -101,7 +92,6 @@ public class GPUBoidController
         computeShader.SetBuffer(idKernelDirections, "boids", buffer);
         computeShader.SetBuffer(idKernelPositions, "boids", buffer);
         buffer.SetData(boidArrayModel.getArray());
-        computeShader.SetInt("nbThreadsPerGroups", nbThreadsPerGroups);
 
         computeShader.SetInt("nbBoids", boidArrayModel.NbBoids);
         computeShader.SetFloat("speed", boidSettings.Speed);
@@ -137,7 +127,7 @@ public class GPUBoidController
     }
 
     // todo: check if i can do that
-    private void OnDestroy()
+    public void OnDestroy()
     {
         if (buffer != null)
         {

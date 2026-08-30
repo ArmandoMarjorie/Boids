@@ -55,15 +55,6 @@ public class GameController : MonoBehaviour
             boundsSettings.Depth,
             boundsSettings.Center);
 
-        // View
-        if (boidView != null)
-			boidView.Init(boidArrayModel, nbBoids);
-		else
-		{
-            Debug.LogError("BoidView is not assigned in the inspector.");
-            Application.Quit();
-        }
-
         // ScriptableObject
         if (boidSettings == null)
         {
@@ -87,4 +78,9 @@ public class GameController : MonoBehaviour
 	{
         GPU_boidController.Update(Time.deltaTime);
 	}
+
+    public void OnDestroy()
+    {
+        GPU_boidController.OnDestroy();
+    }
 }

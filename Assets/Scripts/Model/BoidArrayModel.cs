@@ -13,12 +13,6 @@ public class BoidArrayModel
     {
         return boids;
     }
-    public BoidModel getBoid(int i)
-    {
-        if (boids != null && i >= 0 && i < NbBoids)
-            return boids[i];
-        return null;
-    }
 
     /* ------------- CONSTRUCTOR ------------- */
     public BoidArrayModel(int nbBoids,

@@ -12,9 +12,15 @@ public class GPUBoidView : MonoBehaviour
     private ComputeBuffer graphicsBuffer = null;
     private uint[] graphics = null;
 
-    public void Init(int nbBoids, ComputeBuffer buffer)
+    public void Init(ComputeBuffer buffer, int nbBoids)
     {
-        boidMesh = boidPrefab.GetComponent<MeshFilter>().sharedMesh;
+        /* /!\
+         * The prefab I use has Skinned Mesh Renderer, 
+         * so this code wont work. 
+         * Todo: adapt the code to work with Skinned Mesh Renderer
+        */
+        /*
+        boidMesh = boidPrefab.GetComponentInChildren<MeshFilter>().sharedMesh;
 
         graphics = new uint[5] 
         {
@@ -32,6 +38,7 @@ public class GPUBoidView : MonoBehaviour
         graphicsBuffer.SetData(graphics);
 
         boidMaterial.SetBuffer("boids", buffer);
+        */
     }
 
     public void RefreshBoids()
@@ -40,7 +47,7 @@ public class GPUBoidView : MonoBehaviour
         Graphics.DrawMeshInstancedIndirect(boidMesh, 0, boidMaterial, bounds, graphicsBuffer);
     }
 
-    private void OnDestroy()
+    public void OnDestroy()
     {
         if (graphicsBuffer != null)
         {
