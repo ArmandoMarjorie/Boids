@@ -14,13 +14,16 @@ public class GPUBoidView : MonoBehaviour
 
     public void Init(ComputeBuffer buffer, int nbBoids)
     {
-        /* /!\
-         * The prefab I use has Skinned Mesh Renderer, 
-         * so this code wont work. 
-         * Todo: adapt the code to work with Skinned Mesh Renderer
-        */
-        /*
-        boidMesh = boidPrefab.GetComponentInChildren<MeshFilter>().sharedMesh;
+        SkinnedMeshRenderer skinnedMeshRenderer = boidPrefab.GetComponentInChildren<SkinnedMeshRenderer>();
+
+        if (skinnedMeshRenderer == null)
+        {
+            Debug.LogError("SkinnedMeshRenderer not found.");
+            Application.Quit();
+        }
+
+        boidMesh = new Mesh();
+        skinnedMeshRenderer.BakeMesh(boidMesh);
 
         graphics = new uint[5] 
         {
@@ -38,7 +41,6 @@ public class GPUBoidView : MonoBehaviour
         graphicsBuffer.SetData(graphics);
 
         boidMaterial.SetBuffer("boids", buffer);
-        */
     }
 
     public void RefreshBoids()

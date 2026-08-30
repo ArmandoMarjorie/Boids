@@ -68,7 +68,7 @@ public class GPUBoidController
         }
         idKernelDirections = computeShader.FindKernel("UpdateDirections");
         idKernelPositions = computeShader.FindKernel("UpdatePositions");
-        buffer = new ComputeBuffer(boidArrayModel.NbBoids, sizeof(float) * 6); // à revoir pour size
+        buffer = new ComputeBuffer(boidArrayModel.NbBoids, sizeof(float) * 6); // 3 floats for position + 3 floats for direction
         nbGroupsThreads = Mathf.CeilToInt(boidArrayModel.NbBoids / (float)nbThreadsPerGroups);
     }
 
