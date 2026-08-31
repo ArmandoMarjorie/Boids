@@ -32,7 +32,7 @@ Shader "Boids/BoidRender"
 
 			// Material properties adapted from SoftSurface.shader
 			sampler2D _MainTex;
-			float4 _MainTex_ST; // a voir
+			float4 _MainTex_ST; 
 			fixed4 _Color;
 			fixed _Emission;
 
@@ -58,13 +58,16 @@ Shader "Boids/BoidRender"
 				BoidModel boid = boids[id];
 
 				// Calculate the right, up, and forward vectors based on the boid's direction
-				float3 forward = normalize(boid.direction);
+				float3 forward = normalize(boid.direction); // Assuming boids face toward z axis
 				float3 up = float3(0, 1, 0); // Assuming Y-up world
 				float3 right = cross(up, forward);
 				up = normalize(cross(forward, right)); 
 
-				// Transform the mesh vertices based on the boid's position
-				float3 boidPosition = v.vertex.xyz + boid.position;
+				// Transform the mesh vertices based on the boid's position and orientation
+				float3 boidPosition = boid.position +
+					right * v.vertex.x +
+					up * v.vertex.y +
+					forward * v.vertex.z;
 				o.vertex = UnityObjectToClipPos(boidPosition);
 
 				// uv
