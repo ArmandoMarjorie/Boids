@@ -40,7 +40,9 @@ All the 3D assets are free in the Unity asset store:
 
 ## Architecture
 
-(todo: put an image here)
+![UML Class Diagram](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/ClassDiagram.png)
+
+CageView is not represented as it is only for debugging purpose. 
 
 ## Future improvements
 
