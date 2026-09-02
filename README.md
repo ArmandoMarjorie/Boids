@@ -14,9 +14,9 @@ Real-time 3D simulation of flocking behavior based on the [Boids](https://en.wik
 
 150 Boids (branch Master):
 
-![150 Boids simulation outside the cage](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/gif_animation_001.gif)
+![150 Boids simulation outside the cage](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/gif_animation_006.gif)
 
-![150 Boids simulation inside the cage](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/gif_animation_002.gif)
+![150 Boids simulation inside the cage](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/gif_animation_007.gif)
 
 All the 3D assets are free in the Unity asset store:
 * [3D bird model + animations](https://assetstore.unity.com/packages/3d/characters/animals/quirky-series-free-animals-pack-178235)
@@ -42,7 +42,7 @@ All the 3D assets are free in the Unity asset store:
 
 ![UML Class Diagram](https://github.com/ArmandoMarjorie/Boids/blob/master/Docs/ClassDiagram.png)
 
-CageView is not represented as it is only for debugging purpose. 
+CageView is not represented as it is only for debugging/visualization purpose. 
 
 ## Future improvements
 
