@@ -24,13 +24,7 @@ public class GameController : MonoBehaviour
 	[Header("Boids Settings")]
 
 	[SerializeField]
-	private int boidHistoryMaxSize = 50;
-
-	[SerializeField]
 	private int nbBoids = 100;
-
-	[SerializeField]
-	private bool dessin_parcours = true;
 
 
 	public void Start()
@@ -60,8 +54,7 @@ public class GameController : MonoBehaviour
             boundsSettings.Width,
             boundsSettings.Height,
             boundsSettings.Depth,
-            boundsSettings.Center,
-            boidHistoryMaxSize);
+            boundsSettings.Center);
 
         // View
         if (boidView != null)

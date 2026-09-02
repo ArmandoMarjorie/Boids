@@ -63,7 +63,7 @@ public class BoidController
             KeepInsideBounds(boidModel);
         }
 
-        boidView.RefreshBoids(boidArrayModel, boidSettings, nbBoids, dt);
+        boidView.RefreshBoids(boidArrayModel, boidSettings.RotationSpeed, dt);
     }
 
     /* Returns true if boid 2 is within the field of vision of boid 1, false otherwise.

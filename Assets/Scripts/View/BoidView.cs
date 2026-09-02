@@ -21,8 +21,10 @@ public class BoidView : MonoBehaviour
         }
     }
 
-    public void RefreshBoids(BoidArrayModel arrayModel, BoidSettings settings, int nbBoids, float dt)
+    public void RefreshBoids(BoidArrayModel arrayModel, float rotationSpeed, float dt)
     {
+        int nbBoids = arrayModel.NbBoids;
+
         for (int i = 0; i < nbBoids; i++)
         {
             BoidModel boidModel = arrayModel.getBoid(i);
@@ -34,7 +36,7 @@ public class BoidView : MonoBehaviour
             if (boidModel.Direction != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(boidModel.Direction, Vector3.up);
-                boids[i].rotation = Quaternion.RotateTowards(boids[i].rotation, targetRotation, settings.RotationSpeed * dt); 
+                boids[i].rotation = Quaternion.RotateTowards(boids[i].rotation, targetRotation, rotationSpeed * dt); 
             }
         }
     }

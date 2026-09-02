@@ -21,15 +21,11 @@ public class BoidArrayModel
         float widthCanvas, 
         float heightCanvas,
         float depthCanvas,
-        Vector3 center,
-        int historyMaxSize)
+        Vector3 center)
     {
         // Default array size
         if (nbBoids <= 0)
             nbBoids = 100;
-        // Default history max size
-        if (historyMaxSize <= 0)
-            historyMaxSize = 100;
         // Default canvas size
         if (widthCanvas <= 0)
             widthCanvas = 150;
@@ -58,7 +54,7 @@ public class BoidArrayModel
             Vector3 position = new Vector3(x, y, z) + center;
             Vector3 direction = new Vector3(dx, dy, dz).normalized;
 
-            boids[i] = new BoidModel(position, direction, historyMaxSize);
+            boids[i] = new BoidModel(position, direction);
         }
     }
 
