@@ -49,7 +49,7 @@ The boid's prefab's animator composent has been desactivated for the following t
 
 | Implementation | 150 Boids | 1000 Boids | 10000 Boids | 15000 Boids | 30000 Boids
 | -------------- | :-------: | :--------: | :---------: | :---------: | :---------:
-| **CPU (branch master)** | 80 FPS | 5 FPS | < 2 FPS | < 1 FPS | < 1 FPS
+| **CPU (branch master)** | 80 FPS | 5 FPS | 2 FPS | < 1 FPS | < 1 FPS
 | **GPU (branch HLSL_naive_algo)** | 190 FPS | 170 FPS | 80 FPS | 50 FPS | 20 FPS
 
 ## Architecture
