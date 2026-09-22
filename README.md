@@ -36,7 +36,21 @@ All the 3D assets are free in the Unity asset store:
 
 ## Benchmarks
 
-(todo)
+The boid's prefab's animator composent has been desactivated for the following tests. 
+
+### Configurations
+
+* Unity version: 2020.3.48f1
+* GPU: NVIDIA GeForce RTX 2060 (6 GB)
+* Graphics API: Direct3D11
+* CPU: Intel Core i7-10750H CPU @ 2.60GHz
+* RAM: 16 Go
+* OS: Windows 10, 64 bits
+
+| Implementation | 150 Boids | 1000 Boids | 10000 Boids | 15000 Boids | 30000 Boids
+| -------------- | :-------: | :--------: | :---------: | :---------: | :---------:
+| **CPU (branch master)** | 80 FPS | 5 FPS | < 2 FPS | < 1 FPS | < 1 FPS
+| **GPU (branch HLSL_naive_algo)** | 190 FPS | 170 FPS | 80 FPS | 50 FPS | 20 FPS
 
 ## Architecture
 
